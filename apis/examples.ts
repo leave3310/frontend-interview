@@ -12,6 +12,14 @@ type Response = {
   }
 }
 
+type VerifyOtpResponse = {
+  success: boolean
+  data: {
+    verified: boolean
+    timestamp: string
+  }
+}
+
 const readExample = (id: string, type: 'default') => useHttp().get('/examples/:id', {
   params: {
     id
@@ -41,6 +49,10 @@ const deleteExample = (id: string) => useHttp().delete('/examples/:id', {
   }
 }) as Promise<Response>
 
+const verifyOtpSimple = (otp: string) => useHttp().post('/examples/verify-otp-simple', {
+  body: { otp }
+}) as Promise<VerifyOtpResponse>
+
 export default {
-  readExample, createExample, updateExample, deleteExample
+  readExample, createExample, updateExample, deleteExample, verifyOtpSimple
 }

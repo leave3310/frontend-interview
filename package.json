@@ -2,8 +2,7 @@
   "name": "frontend-interview",
   "version": "0.0.0",
   "private": true,
-  "type": "module", 
-  2tgtg
+  "type": "module",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
@@ -45,5 +44,6 @@
   },
   "overrides": {
     "vue": "latest"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }
