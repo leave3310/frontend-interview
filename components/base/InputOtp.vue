@@ -49,11 +49,7 @@ const handleInput = (index: number, event: Event) => {
   const input = event.target as HTMLInputElement
   const val = input.value.replace(/\D/g, '').slice(-1)
   digits.value[index] = val
-  console.log(input.value)
   input.value = val
-  console.log(input.value)
-  console.log(index)
-  console.log(val)
 
   syncValue()
   apiError.value = null
