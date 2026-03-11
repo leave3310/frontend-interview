@@ -49,14 +49,12 @@ const handleInput = (index: number, event: Event) => {
   const input = event.target as HTMLInputElement
   const val = input.value.replace(/\D/g, '').slice(-1)
   digits.value[index] = val
-  console.log(input.value);
+  console.log(input.value)
   input.value = val
-  console.log(input.value);
-  console.log(index);
-  console.log(val);
-  
-  
-  
+  console.log(input.value)
+  console.log(index)
+  console.log(val)
+
   syncValue()
   apiError.value = null
 
@@ -85,7 +83,7 @@ const handleKeydown = (index: number, event: KeyboardEvent) => {
 const handlePaste = (event: ClipboardEvent) => {
   event.preventDefault()
   const pasted = (event.clipboardData?.getData('text') ?? '').replace(/\D/g, '').slice(0, props.length)
-  if (!pasted) return
+  if (!pasted) { return }
 
   pasted.split('').forEach((char, i) => {
     digits.value[i] = char
@@ -107,7 +105,7 @@ const handlePaste = (event: ClipboardEvent) => {
 
 const onComplete = async () => {
   const result = await validate()
-  if (!result.valid) return
+  if (!result.valid) { return }
 
   const otp = digits.value.join('')
   emit('complete', otp)
@@ -157,7 +155,7 @@ const onComplete = async () => {
         class="absolute inset-0 flex items-center justify-center"
       >
         <svg
-          class="h-6 w-6 animate-spin text-black"
+          class="size-6 animate-spin text-black"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
