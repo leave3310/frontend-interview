@@ -52,7 +52,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 ```ts
 // 每行幾格，預設等於 length → 維持單行向下相容
-const effectiveRowSize = computed(() => props.rowSize ?? props.length)
+// 對無效值（0、負數）補上最小值 1 的防護
+const effectiveRowSize = computed(() => Math.max(1, props.rowSize ?? props.length))
 
 // 將 0..length-1 的索引切分成 2D 陣列（每組 rowSize 個）
 const rows = computed(() => {
@@ -134,3 +135,10 @@ const rows = computed(() => {
 | `rowSize = 1` | 每格獨行 |
 | `length % rowSize !== 0` | 最後一行顯示餘數格，不補空 |
 | `rowSize` 未傳入 | 等同 `rowSize = length`，單行 |
+| `rowSize <= 0` 或非整數 | `effectiveRowSize` 透過 `Math.max(1, ...)` 補救，最小值為 1 |
+
+---
+
+## 注意事項
+
+**Loading spinner overlay：** 外層容器從 `flex` 改為 `flex-col` 後，`relative` 的定位上下文涵蓋所有行，`absolute inset-0` 的 spinner 將覆蓋整個元件（所有行），這是預期行為（使用者無法在 loading 時操作任何格子）。
