@@ -94,7 +94,7 @@ const handleVerify = async (otp: string) => {
 ```ts
 watch(model, (val) => {
   digits.value = val.padEnd(props.length, '').split('').slice(0, props.length)
-})
+}, { immediate: true })
 ```
 
 ### Internal `<input>` elements
@@ -111,17 +111,29 @@ To:
 ```html
 v-model="digits[index]"
 @input="handleInput(index)"
+@focus="handleFocus($event)"
 ```
 
 This is valid because filtering is no longer needed — each native `<input>` has `maxlength="1"`, which limits the character count at the HTML level. The `@input` handler now only manages focus movement and model sync.
+
+> **Note on overwriting filled boxes:** With `v-model` + `maxlength="1"`, the browser blocks typing into a non-empty box without first selecting its content. To preserve the existing overwrite UX, a `@focus` handler selects all content on focus:
+>
+> ```ts
+> const handleFocus = (event: FocusEvent) => {
+>   (event.target as HTMLInputElement).select()
+> }
+> ```
+>
+> This means clicking any filled box immediately selects its digit, and the next keystroke replaces it and advances focus normally.
 
 ### Event Handlers
 
 | Handler | Responsibility |
 |---------|----------------|
 | `handleInput(index)` | Update `model.value`, move focus forward, call `onComplete` if last digit |
-| `handleKeydown(index, event)` | Backspace handling: clear current or previous digit, move focus back |
-| `handlePaste(event)` | Distribute pasted characters (no filtering) across digit boxes, trigger `onComplete` if full. The `.replace(/\D/g, '')` in the current implementation is removed — caller validates character type. |
+| `handleKeydown(index, event)` | Backspace handling: clear current or previous digit, update `model.value`, move focus back |
+| `handlePaste(event)` | Distribute pasted characters (no filtering) across digit boxes, update `model.value`, trigger `onComplete` if full. The `.replace(/\D/g, '')` in the current implementation is removed — caller validates character type. |
+| `handleFocus(event)` | Select all content in the input on focus, so the user can overwrite a filled box by typing |
 
 ### `onComplete`
 
