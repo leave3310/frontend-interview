@@ -32,6 +32,7 @@ Refactor `InputOtp.vue` into a clean, reusable UI component by:
 |------|------|---------|-------------|
 | `length` | `number` | `6` | Number of OTP digits |
 | `loading` | `boolean` | `false` | Disables inputs and shows spinner when true |
+| `error` | `boolean` | `false` | When true, applies error styling (red border/background) to all digit inputs |
 
 ### v-model
 
@@ -82,7 +83,19 @@ const handleVerify = async (otp: string) => {
 ### Internal State
 
 - `digits: Ref<string[]>` — array of individual digit strings, one per input box
-- Model value = `digits.join('')`
+- Model value = `digits.value.join('')`
+
+### Bidirectional Sync
+
+`digits` → `model`: updated inside `handleInput` and `handlePaste` by calling `model.value = digits.value.join('')`.
+
+`model` → `digits`: a watcher handles external resets (e.g., parent clears the value after a failed verify):
+
+```ts
+watch(model, (val) => {
+  digits.value = val.padEnd(props.length, '').split('').slice(0, props.length)
+})
+```
 
 ### Internal `<input>` elements
 
@@ -108,7 +121,7 @@ This is valid because filtering is no longer needed — each native `<input>` ha
 |---------|----------------|
 | `handleInput(index)` | Update `model.value`, move focus forward, call `onComplete` if last digit |
 | `handleKeydown(index, event)` | Backspace handling: clear current or previous digit, move focus back |
-| `handlePaste(event)` | Distribute pasted characters across digit boxes, trigger `onComplete` if full |
+| `handlePaste(event)` | Distribute pasted characters (no filtering) across digit boxes, trigger `onComplete` if full. The `.replace(/\D/g, '')` in the current implementation is removed — caller validates character type. |
 
 ### `onComplete`
 
@@ -132,6 +145,8 @@ No more `validate()`, no more API call, no more `apiError`.
 | `import { useField }` | Validation moved to caller |
 | Zod `schema` computed | Validation moved to caller |
 | `apiError` ref | Error display moved to caller |
+| `errorMessage` (from useField) | Removed with vee-validate |
+| `hasError` computed | Replaced by `props.error` |
 | `loading` ref | Replaced by `loading` prop |
 | API call in `onComplete` | Moved to caller's `@complete` handler |
 | Error message template block | Caller renders errors outside the component |
