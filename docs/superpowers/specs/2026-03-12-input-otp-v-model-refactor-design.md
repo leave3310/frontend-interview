@@ -33,6 +33,7 @@ Refactor `InputOtp.vue` into a clean, reusable UI component by:
 | `length` | `number` | `6` | Number of OTP digits |
 | `loading` | `boolean` | `false` | Disables inputs and shows spinner when true |
 | `error` | `boolean` | `false` | When true, applies error styling (red border/background) to all digit inputs |
+| `inputMode` | `'numeric' \| 'text' \| 'none'` | `'numeric'` | Mobile keyboard type hint. Use `'numeric'` for digit-only OTPs, `'text'` for alphanumeric |
 
 ### v-model
 
@@ -93,7 +94,7 @@ const handleVerify = async (otp: string) => {
 
 ```ts
 watch(model, (val) => {
-  digits.value = val.padEnd(props.length, '').split('').slice(0, props.length)
+  digits.value = Array.from({ length: props.length }, (_, i) => val[i] ?? '')
 }, { immediate: true })
 ```
 
