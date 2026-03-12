@@ -7,10 +7,12 @@ import { useField } from 'vee-validate'
 
 interface Props {
   length?: number
+  rowSize?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  length: 6
+  length: 6,
+  rowSize: undefined
 })
 
 const emit = defineEmits<{
@@ -21,6 +23,21 @@ const digits = ref<string[]>(Array(props.length).fill(''))
 const inputRefs = ref<HTMLInputElement[]>([])
 const loading = ref(false)
 const apiError = ref<string | null>(null)
+
+const effectiveRowSize = computed(() => Math.floor(Math.max(1, props.rowSize ?? props.length)))
+
+const rows = computed(() => {
+  const result: number[][] = []
+  for (let i = 0; i < props.length; i += effectiveRowSize.value) {
+    result.push(
+      Array.from(
+        { length: Math.min(effectiveRowSize.value, props.length - i) },
+        (_, j) => i + j
+      )
+    )
+  }
+  return result
+})
 
 const schema = computed(() =>
   toTypedSchema(
@@ -124,26 +141,32 @@ const onComplete = async () => {
 
 <template>
   <div class="flex flex-col items-center gap-3">
-    <div class="relative flex items-center gap-2">
-      <input
-        v-for="(_, index) in digits"
-        :key="index"
-        :ref="(el) => { if (el) inputRefs[index] = el as HTMLInputElement }"
-        :value="digits[index]"
-        type="text"
-        inputmode="numeric"
-        maxlength="1"
-        :disabled="loading"
-        class="h-12 w-10 rounded-lg border-2 text-center text-lg font-semibold outline-0 transition-colors"
-        :class="[
-          hasError ? 'border-red-500 bg-red-50' : 'border-black bg-white',
-          loading ? 'cursor-not-allowed opacity-50' : ''
-        ]"
-        autocomplete="off"
-        @input="handleInput(index, $event)"
-        @keydown="handleKeydown(index, $event)"
-        @paste="handlePaste($event)"
+    <div class="relative flex flex-col items-center gap-2">
+      <div
+        v-for="(row, rowIndex) in rows"
+        :key="rowIndex"
+        class="flex gap-2"
       >
+        <input
+          v-for="index in row"
+          :key="index"
+          :ref="(el) => { if (el) inputRefs[index] = el as HTMLInputElement }"
+          :value="digits[index]"
+          type="text"
+          inputmode="numeric"
+          maxlength="1"
+          :disabled="loading"
+          class="h-12 w-10 rounded-lg border-2 text-center text-lg font-semibold outline-0 transition-colors"
+          :class="[
+            hasError ? 'border-red-500 bg-red-50' : 'border-black bg-white',
+            loading ? 'cursor-not-allowed opacity-50' : ''
+          ]"
+          autocomplete="off"
+          @input="handleInput(index, $event)"
+          @keydown="handleKeydown(index, $event)"
+          @paste="handlePaste($event)"
+        >
+      </div>
 
       <!-- Loading spinner overlay -->
       <div
